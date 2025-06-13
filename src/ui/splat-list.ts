@@ -99,7 +99,11 @@ class SplatItem extends Container {
 
         const toggleVisible = (event: MouseEvent) => {
             event.stopPropagation();
-            this.visible = !this.visible;
+            if (event.shiftKey) {
+                this.emit('showOnly', this);
+            } else {
+                this.visible = !this.visible;
+            }
         };
 
         const handleRemove = (event: MouseEvent) => {
@@ -172,6 +176,16 @@ class SplatList extends Container {
                 });
                 item.on('invisible', () => {
                     splat.visible = false;
+                });
+                item.on('showOnly', () => {
+                    items.forEach((otherItem) => {
+                        otherItem.visible = otherItem === item;
+                    });
+
+                    // also select it if there is no other selection
+                    if (!events.invoke('selection')) {
+                        events.fire('selection', splat);
+                    }
                 });
             }
         });
